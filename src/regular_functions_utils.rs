@@ -220,8 +220,8 @@ impl<F:PrimeField+FftPrecomp> Mul for &Polynomial<F>{
 #[derive(Clone)]
 /// A function of the form a(x) + y*b(x) on a curve.
 pub struct RegularFunction<C: CurveExt> where C::Base : FftPrecomp{
-    a: Polynomial<C::Base>,
-    b: Polynomial<C::Base>,
+    pub a: Polynomial<C::Base>,
+    pub b: Polynomial<C::Base>,
 }
 
 impl<C: CurveExt> RegularFunction<C> where C::Base : FftPrecomp{
