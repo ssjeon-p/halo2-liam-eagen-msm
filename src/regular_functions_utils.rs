@@ -11,7 +11,7 @@ use subtle::CtOption;
 use std::{ops::{Shl, Add, Mul, Shr}, cmp, iter::*, fmt::{Display, Formatter}, time::SystemTime};
 use rand::{Rng, random};
 
-type Grumpkin = grumpkin::G1;
+pub type Grumpkin = grumpkin::G1;
 
 
 pub trait FftPrecomp {
