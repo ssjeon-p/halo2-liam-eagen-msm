@@ -1,4 +1,4 @@
-use halo2curves::{bn256::Fr as F, serde::SerdeObject};
+use halo2_common::halo2curves::{bn256::Fr as F, serde::SerdeObject};
 use crate::regular_functions_utils::FftPrecomp;
 impl FftPrecomp for F {
     fn omega_pow(exp2: u32) -> F {
