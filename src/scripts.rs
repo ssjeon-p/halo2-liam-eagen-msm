@@ -1,4 +1,4 @@
-use halo2_common::arithmetic::Field;
+use halo2_backend::arithmetic::Field;
 use halo2_common::halo2curves::bn256::Fr as F;
 use halo2_common::halo2curves::ff::PrimeField;
 use halo2_common::halo2curves::grumpkin::Fr as Fq;

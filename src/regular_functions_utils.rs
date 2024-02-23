@@ -1,4 +1,4 @@
-use halo2_common::arithmetic::{
+use halo2_backend::arithmetic::{
     self, best_fft, best_multiexp, eval_polynomial, kate_division, parallelize, FftGroup,
 };
 use halo2_common::halo2curves::bn256::Fr as F;

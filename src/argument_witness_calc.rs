@@ -8,7 +8,7 @@ use crate::regular_functions_utils::gen_random_pt;
 use crate::regular_functions_utils::FftPrecomp;
 use crate::regular_functions_utils::RegularFunction;
 
-use halo2_common::arithmetic::best_multiexp;
+use halo2_backend::arithmetic::best_multiexp;
 use halo2_common::halo2curves::bn256::Fr as F;
 use halo2_common::halo2curves::ff::FromUniformBytes;
 use halo2_common::halo2curves::ff::{Field, PrimeField};
