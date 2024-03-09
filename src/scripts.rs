@@ -1,14 +1,13 @@
 use halo2_backend::arithmetic::Field;
-use halo2_common::halo2curves::bn256::Fr as F;
-use halo2_common::halo2curves::ff::PrimeField;
-use halo2_common::halo2curves::grumpkin::Fr as Fq;
-use halo2_common::halo2curves::serde::SerdeObject;
+use halo2curves::bn256::Fr as F;
+use halo2curves::ff::PrimeField;
+use halo2curves::serde::SerdeObject;
 use std::{fs::File, io::Write};
 
 #[test]
 
 // this could have been a procedural macro, I guess, but I'm bad
-fn precompute_fft_aux_data() -> () {
+fn precompute_fft_aux_data() {
     let mut s: String = "".to_string();
     s += "use halo2curves::{bn256::Fr as F, serde::SerdeObject};\n";
     s += "use crate::regular_functions_utils::FftPrecomp;\n";
@@ -18,9 +17,7 @@ fn precompute_fft_aux_data() -> () {
     for i in 0..64 {
         s += &format!(
             "            {i}=>{:?},\n",
-            F::ROOT_OF_UNITY
-                .pow([(2 as u64).pow(i as u32)])
-                .to_raw_bytes()
+            F::ROOT_OF_UNITY.pow([2_u64.pow(i as u32)]).to_raw_bytes()
         );
     }
     s += "            _=>panic!(),\n";
@@ -34,7 +31,7 @@ fn precompute_fft_aux_data() -> () {
         s += &format!(
             "            {i}=>{:?},\n",
             F::ROOT_OF_UNITY_INV
-                .pow([(2 as u64).pow(i as u32)])
+                .pow([2_u64.pow(i as u32)])
                 .to_raw_bytes()
         );
     }

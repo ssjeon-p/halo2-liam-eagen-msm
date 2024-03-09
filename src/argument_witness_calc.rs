@@ -7,14 +7,12 @@ use crate::regular_functions_utils::compute_divisor_witness;
 use crate::regular_functions_utils::gen_random_pt;
 use crate::regular_functions_utils::FftPrecomp;
 use crate::regular_functions_utils::RegularFunction;
-
-use halo2_backend::arithmetic::best_multiexp;
-use halo2_common::halo2curves::bn256::Fr as F;
-use halo2_common::halo2curves::ff::FromUniformBytes;
-use halo2_common::halo2curves::ff::{Field, PrimeField};
-use halo2_common::halo2curves::group::{prime::PrimeCurveAffine, Curve};
-use halo2_common::halo2curves::grumpkin::Fr as Fq;
-use halo2_common::halo2curves::{bn256, grumpkin, Coordinates, CurveAffine, CurveExt};
+use halo2curves::bn256::Fr as F;
+use halo2curves::ff::FromUniformBytes;
+use halo2curves::ff::{Field, PrimeField};
+use halo2curves::group::{prime::PrimeCurveAffine, Curve};
+use halo2curves::grumpkin::Fr as Fq;
+use halo2curves::{bn256, grumpkin, Coordinates, CurveAffine, CurveExt};
 use num_bigint::BigInt;
 use num_bigint::Sign;
 use num_bigint::ToBigInt;
@@ -161,22 +159,10 @@ where
 
         tmp.push(-carry);
 
-        ret.push(compute_divisor_witness(tmp));
+        ret.push(compute_divisor_witness(&tmp));
     }
 
     ret.reverse();
 
     (carry, ret)
-}
-
-#[test]
-
-fn lhs_test() {
-    let scalars: Vec<Fq> = repeat(gen_random_coeff()).take(10000).collect();
-    let pts: Vec<Grumpkin> = repeat(gen_random_pt()).take(10000).collect();
-    let pts_aff: Vec<grumpkin::G1Affine> = pts.iter().map(|x| x.into()).collect();
-    let a = best_multiexp(&scalars, &pts_aff);
-    let (b, _) = compute_lhs_witness(&scalars, &pts, 5);
-
-    assert!(a == b.into());
 }

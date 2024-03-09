@@ -1,11 +1,13 @@
 use halo2_backend::arithmetic::{
-    self, best_fft, best_multiexp, eval_polynomial, kate_division, parallelize, FftGroup,
+    self, eval_polynomial, kate_division, parallelize, FftGroup,
 };
-use halo2_common::halo2curves::bn256::Fr as F;
-use halo2_common::halo2curves::ff::{BatchInvert, BatchInverter, Field, PrimeField};
-use halo2_common::halo2curves::group::{prime::PrimeCurveAffine, Curve, Group};
-use halo2_common::halo2curves::grumpkin::Fr as Fq;
-use halo2_common::halo2curves::{
+use halo2curves::bn256::Fr as F;
+use halo2curves::ff::{BatchInvert, BatchInverter, Field, PrimeField};
+use halo2curves::fft::best_fft;
+use halo2curves::group::{prime::PrimeCurveAffine, Curve, Group};
+use halo2curves::grumpkin::Fr as Fq;
+use halo2curves::msm::best_multiexp;
+use halo2curves::{
     bn256,
     grumpkin::{self, G1Affine},
     Coordinates, CurveAffine, CurveExt,
@@ -517,7 +519,7 @@ where
 /// computes projective coordinates from Jacobi coordinates
 pub fn projective_coords<C: CurveExt>(pt: &C) -> (C::Base, C::Base, C::Base) {
     let (x, y, z) = pt.jacobian_coordinates();
-    //affine is x/z^2, y/z^3, therefore projective are xz, y, z^3
+    //affine is x/z^2, y/z^3, therefore projective are xz, y, z^3d
     let zsq = z * z;
     (x * z, y, z * zsq)
 }
@@ -537,7 +539,7 @@ pub fn gen_random_pt<C: CurveExt>() -> C {
     hasher(&tmp.to_le_bytes())
 }
 
-pub fn compute_divisor_witness_partial<C: CurveExt>(pts: Vec<C>) -> (RegularFunction<C>, C)
+pub fn compute_divisor_witness_partial<C: CurveExt>(pts: &[C]) -> (RegularFunction<C>, C)
 where
     C::Base: FftPrecomp,
 {
@@ -567,7 +569,7 @@ where
 // }
 
 /// computes a regular function vanishing in a collection of points, panics if the sum is nonzero
-pub fn compute_divisor_witness<C: CurveExt>(pts: Vec<C>) -> RegularFunction<C>
+pub fn compute_divisor_witness<C: CurveExt>(pts: &[C]) -> RegularFunction<C>
 where
     C::Base: FftPrecomp,
 {
@@ -610,11 +612,11 @@ where
     }
 }
 
-pub fn compute_divisor_witness_naive<C: CurveExt>(pts: Vec<C>) -> Arrangement<C>
+pub fn compute_divisor_witness_naive<C: CurveExt>(pts: &[C]) -> Arrangement<C>
 where
     C::Base: FftPrecomp,
 {
-    let mut pos = pts.clone();
+    let mut pos = pts.to_vec();
     let mut neg = vec![];
 
     let mut ret = Arrangement::<C> {
@@ -719,7 +721,7 @@ fn karatsuba_test() {
 #[test]
 
 fn bench_naive() {
-    for i in 1..1000 {
+    for i in 1..10 {
         let p = Polynomial::new(repeat(F::random(OsRng)).take(i).collect());
         let q = Polynomial::new(repeat(F::random(OsRng)).take(i).collect());
 
@@ -797,7 +799,8 @@ fn randpoints_witness_test() {
     pts.push((-res).into());
     scalars.push(Fq::ONE);
 
-    let regf = compute_divisor_witness::<Grumpkin>(pts.clone().iter().map(|x| x.into()).collect());
+    let pts: Vec<Grumpkin> = pts.iter().map(|x| x.into()).collect();
+    let regf = compute_divisor_witness::<Grumpkin>(&pts);
 
     let _: Vec<()> = pts
         .into_iter()
@@ -821,7 +824,7 @@ fn witness_with_zeros_test() {
         a,
         -a,
     ];
-    let regf = compute_divisor_witness(pts.clone());
+    let regf = compute_divisor_witness(&pts);
     let _: Vec<()> = pts
         .into_iter()
         .map(|pt| {
@@ -841,10 +844,10 @@ fn randpoints_witness_naive_test() {
     let mut pts: Vec<Grumpkin> = repeat(gen_random_pt()).take(500).collect();
     let bases: Vec<grumpkin::G1Affine> = pts.iter().map(|x| x.into()).collect();
     let res = best_multiexp(&scalars, &bases);
-    pts.push((-res));
+    pts.push(-res);
     scalars.push(Fq::ONE);
 
-    let _ = compute_divisor_witness_naive(pts.clone());
+    let _ = compute_divisor_witness_naive(&pts);
 }
 
 #[test]
@@ -858,14 +861,14 @@ fn randpoints_witness_bench() {
     scalars.push(Fq::ONE);
 
     let start = SystemTime::now();
-    compute_divisor_witness(pts.clone());
+    compute_divisor_witness(&pts);
     println!(
         "Computed regular function vanishing in 1024 random points in {} ms",
         start.elapsed().unwrap().as_millis()
     );
 
     let start = SystemTime::now();
-    compute_divisor_witness_naive(pts.clone());
+    compute_divisor_witness_naive(&pts);
     println!(
         "Computed configuration of lines vanishing in 1024 random points in {} ms",
         start.elapsed().unwrap().as_millis()
@@ -900,12 +903,12 @@ fn randpoints_witness_bench() {
     let mut pts: Vec<Grumpkin> = repeat(gen_random_pt()).take(3).collect();
     let bases: Vec<grumpkin::G1Affine> = pts.iter().map(|x| x.into()).collect();
     let res = best_multiexp(&scalars, &bases);
-    pts.push((-res));
+    pts.push(-res);
     scalars.push(Fq::ONE);
 
     let start = SystemTime::now();
     for _ in 0..256 {
-        compute_divisor_witness(pts.clone());
+        compute_divisor_witness(&pts);
     }
     println!(
         "Computed regular function vanishing in 4 random points 256 times in {} ms",

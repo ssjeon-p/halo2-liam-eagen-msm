@@ -1,12 +1,11 @@
+use halo2curves::ff::{Field, PrimeField};
+use num_bigint::BigInt;
+use num_bigint::Sign;
+use num_traits::{pow, Zero};
+use rand::random;
 use std::vec;
 
-use halo2_common::halo2curves::ff::{Field, PrimeField};
-use num_bigint::Sign;
-use num_bigint::{BigInt, RandomBits};
-use num_traits::{pow, Num, One, Zero};
-use rand::{random, Rng};
-
-pub fn range_check(x: &BigInt) -> () {
+pub fn range_check(x: &BigInt) {
     let threshold = pow(BigInt::from_bytes_le(Sign::Plus, &[2]), 127);
     assert!(x < &threshold);
     assert!(x > &-threshold);
@@ -15,7 +14,7 @@ pub fn range_check(x: &BigInt) -> () {
 pub fn negbase_decompose(x: &BigInt, base: u8) -> Vec<u8> {
     let mut x = x.clone();
     let mut acc = vec![];
-    while (x != BigInt::zero()) {
+    while x != BigInt::zero() {
         let mut digit = x.clone() % base;
         match digit.sign() {
             // NICE % OPERATOR YOU HAVE THERE BIGINT LIBRARY!!!!!!
@@ -79,7 +78,7 @@ pub fn prepare_scalar_witness(
     base: u8,
     num_digits: usize,
     logtable: usize,
-) -> Vec<Vec<(Entry)>> {
+) -> Vec<Vec<Entry>> {
     let digits = negbase_decompose(sc, base);
     assert!(digits.len() <= num_digits);
     let num_limbs = (num_digits + logtable - 1) / logtable;
@@ -88,7 +87,7 @@ pub fn prepare_scalar_witness(
 
     for i in 0..(base as usize) {
         ret.push(vec![]);
-        for j in 0..num_limbs + 1 {
+        for _j in 0..num_limbs + 1 {
             ret[i].push((0, 0))
         }
     }
@@ -99,9 +98,9 @@ pub fn prepare_scalar_witness(
             Some(id) => {
                 ret[id + 1][0].0 += pow(-(base as i128), i);
                 ret[id + 1][i % logtable + 1].0 += pow(-(base as i128), i % logtable);
-                ret[id + 1][i % logtable + 1].1 += pow(2 as u32, i % logtable);
+                ret[id + 1][i % logtable + 1].1 += pow(2_u32, i % logtable);
                 ret[0][i % logtable + 1].0 += pow(-(base as i128), i % logtable);
-                ret[0][i % logtable + 1].1 += pow(2 as u32, i % logtable);
+                ret[0][i % logtable + 1].1 += pow(2_u32, i % logtable);
             }
         }
     }
@@ -113,7 +112,7 @@ pub fn prepare_scalar_witness(
         for j in 0..num_limbs + 1 {
             ret_[i].push(if (i == 0) && (j == 0) {
                 Entry::Scalar(sc.clone())
-            } else if (j == 0) {
+            } else if j == 0 {
                 Entry::Bucket(ret[i][j].0)
             } else {
                 Entry::Limb(ret[i][j].0, ret[i][j].1)
@@ -126,7 +125,7 @@ pub fn prepare_scalar_witness(
 
 #[test]
 
-fn negbase_test() -> () {
+fn negbase_test() {
     let rnd: u32 = random();
     let rnd = BigInt::from_bytes_le(Sign::Plus, &rnd.to_le_bytes());
     let mut tmp = negbase_decompose(&rnd, 17);
