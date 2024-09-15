@@ -7,10 +7,10 @@ edition = "2021"
 num-bigint = { version = "0.4", features = ["rand"] }
 num-integer = "0.1"
 num-traits = "0.2"
-halo2_proofs = { git = "https://github.com/privacy-scaling-explorations/halo2.git" }
-halo2_common = { git = "https://github.com/privacy-scaling-explorations/halo2.git" }
-halo2_backend = { git = "https://github.com/privacy-scaling-explorations/halo2.git" }
-halo2curves = { git = "https://github.com/privacy-scaling-explorations/halo2curves.git" }
+halo2_proofs = { git = "https://github.com/privacy-scaling-explorations/halo2.git", rev = 'c08b877793019d067a5ff2f221a59977fceef69d' }
+halo2_common = { git = "https://github.com/privacy-scaling-explorations/halo2.git", rev = 'c08b877793019d067a5ff2f221a59977fceef69d' }
+halo2_backend = { git = "https://github.com/privacy-scaling-explorations/halo2.git", rev = 'c08b877793019d067a5ff2f221a59977fceef69d' }
+halo2curves = { git = "https://github.com/privacy-scaling-explorations/halo2curves.git", rev = '59bf057b8f911d58b277aff33dac793d30d61116' }
 subtle = { version = "2.3", default-features = false }
 rand = "0.8"
 rand_core = { version = "0.6", default-features = false }
